@@ -1,5 +1,6 @@
 import Review from "@/models/review";
 import { connectMongoDB } from "@/lib/mongodb";
+import { NextResponse } from "next/server";
 
 
 export async function POST(req) {
@@ -8,9 +9,9 @@ export async function POST(req) {
     const body = await req.json();
 
     const { customerId, customerName, productName, quantity, favoriteFlavor, feedback, rating, userId } = body;
-    console.log(body)
+
     if (!customerId || !productName || !quantity || !favoriteFlavor || !feedback || !rating) {
-      return new Response(JSON.stringify({ message: "All fields are required" }), { status: 400, headers: { "Content-Type": "application/json" } });
+      return NextResponse.json({ message: "All fields are required" }, { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
     const review = await Review.create({
@@ -24,9 +25,9 @@ export async function POST(req) {
       userId,
     });
 
-    return new Response(JSON.stringify({ message: "Review created", review }), { status: 201, headers: { "Content-Type": "application/json" } });
+    return NextResponse.json({ message: "Review created", review }, { status: 201, headers: { "Content-Type": "application/json" } });
   } catch (error) {
-    return new Response(JSON.stringify({ message: error.message }), { status: 500, headers: { "Content-Type": "application/json" } });
+    return  NextResponse.json({ message: error.message }, { status: 500, headers: { "Content-Type": "application/json" } });
   }
 }
 
@@ -53,14 +54,15 @@ export async function GET() {
       userId: review.userId,
       createdAt: review.createdAt,
       updatedAt: review.updatedAt,
+      status:review.status
     }));
     
-    return new Response(JSON.stringify({ data: formattedReviews }), {
+    return  NextResponse.json({ data: formattedReviews }, {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ message: error.message }), {
+    return  NextResponse.json({ message: error.message }, {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

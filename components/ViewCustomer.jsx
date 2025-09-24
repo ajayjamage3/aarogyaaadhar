@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { FaUsers, FaUser, FaStar, FaComment, FaIceCream, FaRegClock, FaBox } from 'react-icons/fa';
 
 export default function ViewCustomers() {
-  const { data: session, status } = useSession();
   const router = useRouter();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,11 +30,6 @@ export default function ViewCustomers() {
     fetchReviews();
   }, []);
 
-  if (status === 'loading') return <div className="flex items-center justify-center min-h-screen text-gray-600">Loading...</div>;
-  if (status === 'unauthenticated') {
-    router.push('/login');
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">

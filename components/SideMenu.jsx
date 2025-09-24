@@ -17,13 +17,15 @@ export default function SideMenu() {
     {
       name: "Logout",
       icon: <FaSignOutAlt className="mr-3" />,
-      onClick: () => signOut({ callbackUrl: "/login" }),
+      onClick: async () => {
+        sessionStorage.clear();
+        await signOut({ callbackUrl: "/login" });
+      },
     },
   ];
 
   return (
     <div className="relative flex-shrink-0">
-      {/* Mobile toggle */}
       <button
         onClick={toggleMenu}
         className="md:hidden fixed top-4 left-4 z-50 p-2 bg-green-600 text-white rounded-md focus:outline-none shadow-md"
@@ -31,12 +33,10 @@ export default function SideMenu() {
         {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
       </button>
 
-      {/* Sidebar */}
       <aside
         className={`fixed md:static top-0 left-0 h-screen w-64 bg-white text-gray-800 shadow-lg flex flex-col transform transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 z-40`}
       >
-        {/* Header */}
         <div className="h-16 flex items-center justify-center bg-green-600 text-white text-xl font-bold shadow">
           My App
         </div>
@@ -72,13 +72,11 @@ export default function SideMenu() {
           </ul>
         </nav>
 
-        {/* Footer */}
         <div className="p-4 border-t border-gray-200 text-sm text-gray-500">
           © {new Date().getFullYear()} My App
         </div>
       </aside>
 
-      {/* Overlay for mobile */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-20 md:hidden z-30"

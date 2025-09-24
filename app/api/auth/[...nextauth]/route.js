@@ -16,17 +16,17 @@ export const authOptions = {
           await connectMongoDB();
           const user = await User.findOne({ email });
 
-          if (!user) {
-            return null;
-          }
+          if (!user) return null;
 
           const passwordsMatch = await bcrypt.compare(password, user.password);
+          if (!passwordsMatch) return null;
 
-          if (!passwordsMatch) {
-            return null;
-          }
-
-          return user;
+          return {
+            id: user._id.toString(),
+            name: user.name,
+            email: user.email,
+            role: user.role || "user",
+          };
         } catch (error) {
           console.log("Error: ", error);
           return null;
@@ -36,8 +36,27 @@ export const authOptions = {
   ],
   session: {
     strategy: "jwt",
-    maxAge: 60 * 60, // 1 hour in seconds
-    updateAge: 15 * 60, // 15 minutes
+    maxAge: 60 * 60,
+    updateAge: 15 * 60,
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.user = {
+        id: token.id,
+        email: token.email,
+        name: token.name,
+      };
+      session.accessToken = token.id;
+      return session;
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {

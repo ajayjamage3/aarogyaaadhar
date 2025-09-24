@@ -16,63 +16,17 @@ import {
 } from "recharts";
 
 export default function Dashboard() {
-  // Dummy initial data
-  const initialData = [
-    {
-      _id: "1",
-      productName: "Product A",
-      quantity: "10",
-      favoriteFlavor: "Vanilla",
-      feedback: "Great!",
-      rating: 4,
-      status: 1,
-    },
-    {
-      _id: "2",
-      productName: "Product B",
-      quantity: "5",
-      favoriteFlavor: "Chocolate",
-      feedback: "Good",
-      rating: 3,
-      status: 0,
-    },
-    {
-      _id: "3",
-      productName: "Product C",
-      quantity: "8",
-      favoriteFlavor: "Strawberry",
-      feedback: "Excellent",
-      rating: 5,
-      status: 1,
-    },
-    {
-      _id: "4",
-      productName: "Product D",
-      quantity: "6",
-      favoriteFlavor: "Vanilla",
-      feedback: "Okay",
-      rating: 2,
-      status: 0,
-    },
-  ];
 
-  const [reviews, setReviews] = useState(initialData);
-  const [stats, setStats] = useState({
-    total: initialData.length,
-    averageRating:
-      (initialData.reduce((a, b) => a + b.rating, 0) / initialData.length).toFixed(2),
-    active: initialData.filter((r) => r.status === 1).length,
-    inactive: initialData.filter((r) => r.status !== 1).length,
-  });
+  const [reviews, setReviews] = useState([]);
+  const [stats, setStats] = useState({});
 
   useEffect(() => {
-    // Fetch real data if needed
     fetch("/api/reviews")
       .then((res) => res.json())
       .then((data) => {
-        if (data.length > 0) {
-          setReviews(data);
-          calculateStats(data);
+        if (data.data.length > 0) {
+          setReviews(data.data);
+          calculateStats(data.data);
         }
       });
   }, []);
@@ -118,11 +72,11 @@ export default function Dashboard() {
           <p className="text-xl font-bold">{stats.averageRating}</p>
         </div>
         <div className="bg-yellow-500 text-white p-4 rounded shadow flex flex-col items-center">
-          <h2>Active Reviews</h2>
+          <h2>Active Users</h2>
           <p className="text-xl font-bold">{stats.active}</p>
         </div>
         <div className="bg-red-500 text-white p-4 rounded shadow flex flex-col items-center">
-          <h2>Inactive Reviews</h2>
+          <h2>Inactive Users</h2>
           <p className="text-xl font-bold">{stats.inactive}</p>
         </div>
       </div>

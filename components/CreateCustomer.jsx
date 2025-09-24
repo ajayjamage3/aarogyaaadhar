@@ -2,22 +2,15 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { FaUser, FaStar } from 'react-icons/fa';
 
 export default function CustomerReviewForm() {
-  const { data: session, status } = useSession();
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [customerId, setCustomerId] = useState(null);
 
-  if (status === 'loading') return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
-  if (status === 'unauthenticated') {
-    router.push('/login');
-    return null;
-  }
 
   const CustomerSchema = Yup.object().shape({
     name: Yup.string().required('Customer name is required'),
@@ -38,6 +31,22 @@ export default function CustomerReviewForm() {
 
   const handleCustomerSubmit = async (values, { setSubmitting, setFieldError }) => {
     try {
+
+      const resUserExists = await fetch("api/userExists", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email:values.email }),
+      });
+
+      const { user } = await resUserExists.json();
+
+      if (user) {
+        setFieldError('general','User already exists.');
+        return;
+      }
+
       const response = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -45,7 +54,7 @@ export default function CustomerReviewForm() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Failed to create customer');
-      setCustomerId(data._id);
+      setCustomerId(data.user.id);
       setStep(2);
     } catch (err) {
       setFieldError('general', err.message);
@@ -59,7 +68,7 @@ export default function CustomerReviewForm() {
       const response = await fetch('/api/reviews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...values, userId: session.user.id }),
+        body: JSON.stringify({ ...values }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Failed to submit review');
@@ -141,7 +150,7 @@ export default function CustomerReviewForm() {
                 favoriteFlavor: '',
                 feedback: '',
                 rating: 5,
-                customerId:'68d2d4d7b051cf468372a43e'
+                customerId:customerId
               }}
               validationSchema={ReviewSchema}
               onSubmit={handleReviewSubmit}

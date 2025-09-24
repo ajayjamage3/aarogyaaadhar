@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import Link from "next/link";
@@ -27,6 +27,18 @@ export default function LoginForm() {
       if (res.error) {
         setFieldError("general", "Invalid email or password");
       } else {
+        const session = await getSession();
+      if (session) {
+        sessionStorage.setItem(
+          "auth",
+          JSON.stringify({
+            user: session.user,
+            token: session.accessToken,
+            expires:session.expires,
+          })
+        );
+      }
+
         router.replace("/dashboard");
       }
     } catch (err) {
@@ -92,15 +104,6 @@ export default function LoginForm() {
               >
                 {isSubmitting ? "Logging in..." : "Login"}
               </button>
-
-              <div className="text-sm text-center text-gray-600 mt-4">
-                Don't have an account?{" "}
-                <Link href="/register">
-                  <span className="underline text-green-600 hover:text-green-700 cursor-pointer">
-                    Register
-                  </span>
-                </Link>
-              </div>
             </Form>
           )}
         </Formik>
